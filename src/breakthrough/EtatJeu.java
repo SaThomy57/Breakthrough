@@ -99,4 +99,23 @@ public class EtatJeu {
 		}
 		return successeurs;
 	}
+
+	/**
+	 * Fonction qui permet de calculer la difference de pions
+	 */
+	public double evolutionNaive(){
+		int b = 0;
+		int n = 0;
+		for (int i = 0; i < 8; i++) {
+			for (int j = 0; j < largeur; j++) {
+				Joueur pion = plateau.getCase(i, j);
+				if (pion == Joueur.joueurBlanc) {
+					b++;
+				} else if (pion == Joueur.joueurNoir) {
+					n++;
+				}
+			}
+		}
+		return tourBlanc ? (b-n) : (n-b);
+	}
 }
