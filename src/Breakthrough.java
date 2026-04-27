@@ -10,22 +10,67 @@ public class Breakthrough {
         EtatJeu jeu = new EtatJeu(largeur);
 
         System.out.println("=== BREAKTHROUGH ===");
+        // CHoix du mode de jeu
+        System.out.println("Choisissez le mode de jeu :");
+        System.out.println("1. Humain VS Humain");
+        System.out.println("2. Humain VS IA");
+        int mode = sc.nextInt();
 
-        // BOUCLE DE JEU
+        IA intelligence = null;
+        if (mode == 2) {
+            System.out.println("Entrez la profondeur maximale de l'IA :");
+            int profondeurMax = sc.nextInt();
+            intelligence = new IA(profondeurMax);
+        }
+
+        // boucle de jeu
         while (jeu.etatFinal() == Gagnant.AUCUN) {
-            jeu.getPlateau().afficher(); // Utilise la version améliorée
+            jeu.getPlateau().afficher();
 
-            String couleur = jeu.getTourBlanc() ? "BLANCS (B)" : "NOIRS (N)";
-            System.out.println("\nC'est au tour des " + couleur);
+            // Pions blancs (Toujours Humain dans ce code)
+            if (jeu.getTourBlanc()) {
+                System.out.println("\nTour des BLANCS (Humain)");
+                jeu = jouerCoupHumain(jeu, sc); // Appel de al methode general
+
+            } else {
+                // Pions noir (Humain ou IA)
+                if (mode == 1) {
+                    System.out.println("\nTour des NOIRS (Humain)");
+                    jeu = jouerCoupHumain(jeu, sc);
+                } else {
+                    System.out.println("\nL'IA réfléchit...");
+                    long debut = System.currentTimeMillis();
+
+                    jeu = intelligence.choisirMeilleurCoup(jeu);
+
+                    long fin = System.currentTimeMillis();
+                    System.out.println("IA a joué en " + (fin - debut) + " ms.");
+                }
+            }
+        }
+
+        // fin du jeu
+        jeu.getPlateau().afficher();
+        Gagnant gagnant = jeu.etatFinal();
+        System.out.println("\n=== PARTIE TERMINÉE ===");
+        if (gagnant == Gagnant.BLANC) System.out.println("VICTOIRE DES BLANCS !");
+        else System.out.println("VICTOIRE DES NOIRS !");
+
+        sc.close();
+    }
+
+    /**
+     * Methode pour eviter la repetition de saisi
+     */
+    private static EtatJeu jouerCoupHumain(EtatJeu jeu, Scanner sc) {
+        EtatJeu suivant = null;
+        while (suivant == null) {
             System.out.println("Entrez votre coup (ligne colonne direction) :");
-            System.out.println("Direction : -1 (diag gauche), 0 (tout droit), 1 (diag droite)");
-
-            try {
+            try{
                 int l = sc.nextInt();
                 int c = sc.nextInt();
                 int d = sc.nextInt();
 
-                // On vérifie si le pion appartient bien au joueur
                 Joueur pion = jeu.getPlateau().getCase(l, c);
                 Joueur courant = jeu.getTourBlanc() ? Joueur.joueurBlanc : Joueur.joueurNoir;
 
@@ -34,28 +79,16 @@ public class Breakthrough {
                     continue;
                 }
 
-                // Calcul du nouvel état
-                EtatJeu suivant = jeu.calculSuccesseur(l, c, d);
-
+                suivant = jeu.calculSuccesseur(l, c, d);
                 if (suivant == null) {
-                    System.out.println("Coup invalide selon les règles du Breakthrough !");
-                } else {
-                    jeu = suivant; // Le coup est validé, on passe à l'état suivant
+                    System.out.println("Coup illégal !");
                 }
 
-            } catch (Exception e) {
-                System.out.println("Entrée invalide. Veuillez saisir trois chiffres.");
-                sc.nextLine(); // Nettoyer le scanner
+            }catch(Exception e){
+                System.out.println("Erreur de saisie !");
+                sc.nextLine();
             }
         }
-
-        // FIN DE PARTIE
-        jeu.getPlateau().afficher();
-        Gagnant gagnant = jeu.etatFinal();
-        System.out.println("\n=== PARTIE TERMINÉE ===");
-        if (gagnant == Gagnant.BLANC) System.out.println("VICTOIRE DES BLANCS !");
-        else System.out.println("VICTOIRE DES NOIRS !");
-
-        sc.close();
+        return suivant;
     }
 }
