@@ -30,6 +30,23 @@ public class Plateau {
 		}
     }
 
+	/**
+	 *	Constructeur par copie pour l'IA
+	 */
+	public Plateau(Plateau copie){
+		this.largeur=copie.getLargeur();
+		this.plateau = new Case[8][largeur];
+		for (int i = 0; i < 8; i++) {
+			for (int j = 0; j < largeur; j++) {
+				this.plateau[i][j] = new Case();
+				Joueur jCopie = copie.getCase(i, j);
+				if (jCopie != null) {
+					plateau[i][j].remplace(jCopie);
+				}
+			}
+		}
+	}
+
     public Joueur getCase(int i, int j) {
 		Case c=getPlateau()[i][j];
 		if (c.getOccupe()) {
